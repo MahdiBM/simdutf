@@ -2,6 +2,11 @@
 #include <initializer_list>
 #include <climits>
 #include <type_traits>
+
+#include <ptrcheck.h>
+#include <lifetimebound.h>
+#include <span>
+
 #if SIMDUTF_ATOMIC_REF
   #include <array>
   #include "simdutf/scalar/atomic_util.h"

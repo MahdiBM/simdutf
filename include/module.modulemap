@@ -1,0 +1,7 @@
+module simdutf {
+    umbrella header "simdutf.h"
+    exclude header "simdutf/constexpr_ptr.h"
+    requires cplusplus
+    export *
+    module * { export * }
+}

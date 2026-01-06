@@ -13,11 +13,16 @@
 #include "simdutf/error.h"
 #include "simdutf/internal/isadetection.h"
 
+#include <ptrcheck.h>
+#include <lifetimebound.h>
+#include <span>
+
 #if SIMDUTF_SPAN
   #include <concepts>
   #include <type_traits>
   #include <span>
   #include <tuple>
+
 #endif
 #if SIMDUTF_CPLUSPLUS17
   #include <string_view>
@@ -312,6 +317,21 @@ validate_ascii(const detail::input_span_of_byte_like auto &input) noexcept {
                           input.size());
   }
 }
+
+using uint8_span = std::span<const std::uint8_t>;
+simdutf_really_inline simdutf_warn_unused simdutf_constexpr23 bool
+validate_ascii(uint8_span input simdutf_noescape) noexcept {
+    #if SIMDUTF_CPLUSPLUS23
+  if consteval {
+    return scalar::ascii::validate(
+        detail::constexpr_cast_ptr<std::uint8_t>(input.data()), input.size());
+  } else
+    #endif
+  {
+    return validate_ascii(reinterpret_cast<const char *>(input.data()),
+                          input.size());
+  }
+}
   #endif // SIMDUTF_SPAN
 
 /**
@@ -361,9 +381,11 @@ validate_ascii_with_errors(
  */
 simdutf_warn_unused bool validate_utf16_as_ascii(const char16_t *buf,
                                                  size_t len) noexcept;
-  #if SIMDUTF_SPAN
+    #if SIMDUTF_SPAN
+using char16_span = std::span<const char16_t>;
+
 simdutf_really_inline simdutf_warn_unused simdutf_constexpr23 bool
-validate_utf16_as_ascii(std::span<const char16_t> input) noexcept {
+validate_utf16_as_ascii(char16_span input simdutf_noescape) noexcept {
     #if SIMDUTF_CPLUSPLUS23
   if consteval {
     return scalar::utf16::validate_as_ascii<endianness::NATIVE>(input.data(),
